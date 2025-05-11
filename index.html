@@ -24,6 +24,8 @@
       // Reset href and src attributes to empty
       html = html.replace(/\bhref\s*=\s*(['"])(.*?)\1/gi, 'href=""');
       html = html.replace(/\bsrc\s*=\s*(['"])(.*?)\1/gi, 'src=""');
+      html = html.replace(/\balt\s*=\s*(['"])(.*?)\1/gi, 'alt=""');
+      html = html.replace(/\btitle\s*=\s*(['"])(.*?)\1/gi, 'title=""');
 
       // Replace all color formats with white (#ffffff)
       html = html.replace(/(#(?:[0-9a-fA-F]{3,6})|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|\b[a-z]+\b)(?=[\s;:])/gi, function(match) {
