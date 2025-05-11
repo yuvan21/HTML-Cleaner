@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title> HTML Cleaner</title>
+  <title>HTML Cleaner</title>
   <style>
     body { font-family: Arial; padding: 20px; max-width: 800px; margin: auto; }
     textarea { width: 100%; height: 200px; margin-bottom: 10px; }
@@ -12,7 +12,6 @@
 <body>
 
   <h2>Siva's HTML Cleaner</h2>
-  
 
   <textarea id="input" placeholder="Paste your HTML code here..."></textarea>
   <button onclick="cleanHTML()">Clean HTML</button>
@@ -22,12 +21,12 @@
     function cleanHTML() {
       let html = document.getElementById('input').value;
 
-      
-      html = html.replace(/\b(href|src|alt|title)\s*=\s*(['"])(.*?)\2/gi, '$1=$2$2');
+      // Reset href and src attributes to empty
+      html = html.replace(/\bhref\s*=\s*(['"])(.*?)\1/gi, 'href=""');
+      html = html.replace(/\bsrc\s*=\s*(['"])(.*?)\1/gi, 'src=""');
 
-      
-      html = html.replace(/(#(?:[0-9a-fA-F]{3}){1,2})|rgb\([^\)]+\)|rgba\([^\)]+\)|hsl\([^\)]+\)|hsla\([^\)]+\)|\b[a-z]+\b(?=\s*;?)/gi, function(match) {
-        
+      // Replace all color formats with white (#ffffff)
+      html = html.replace(/(#(?:[0-9a-fA-F]{3,6})|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|\b[a-z]+\b)(?=[\s;:])/gi, function(match) {
         const colorKeywords = ['black', 'red', 'blue', 'green', 'gray', 'grey', 'orange', 'purple', 'yellow', 'pink', 'teal', 'navy', 'maroon', 'lime', 'aqua', 'silver', 'gold'];
         if (match.startsWith('#') || match.startsWith('rgb') || match.startsWith('hsl') || colorKeywords.includes(match.toLowerCase())) {
           return '#ffffff';
@@ -35,23 +34,23 @@
         return match;
       });
 
-      
-      html = html.replace(/(border[^:]*:\s*[^;]*)(#[0-9a-fA-F]{3,6}|rgb\([^\)]+\)|[a-z]+)/gi, function(match, prefix) {
-        return prefix + '#ffffff';
-      });
+      // Force border colors to white (#ffffff)
+      html = html.replace(/(border[^:]*:\s*)([^;]+)/gi, '$1#ffffff');
 
-      
+      // Clean style attributes: remove specific properties and set white colors
       html = html.replace(/style\s*=\s*(['"])(.*?)\1/gi, function(match, quote, styles) {
         let newStyles = styles
-          .replace(/display\s*:\s*block/gi, 'display: none')
-          .replace(/width\s*:\s*[^;]+/gi, 'width: 0')
-          .replace(/height\s*:\s*[^;]+/gi, 'height: 0');
-        return `style=${quote}${newStyles}${quote}`;
+          .replace(/display\s*:\s*[^;]+/gi, '')
+          .replace(/width\s*:\s*[^;]+/gi, '')
+          .replace(/height\s*:\s*[^;]+/gi, '')
+          .replace(/(color|background|border[^:]*)\s*:\s*[^;]+/gi, '$1: #ffffff');
+        return `style=${quote}${newStyles.trim()}${quote}`;
       });
 
-      
+      // Remove any text between tags (keep the tags)
       html = html.replace(/>([^<]*)</g, '><');
 
+      // Update the output field with cleaned HTML
       document.getElementById('output').value = html;
     }
   </script>
