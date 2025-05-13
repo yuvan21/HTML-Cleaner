@@ -42,7 +42,7 @@
       // Clean style attributes: remove specific properties and set white colors
       html = html.replace(/style\s*=\s*(['"])(.*?)\1/gi, function(match, quote, styles) {
         let newStyles = styles
-          .replace(/display\s*:\s*block[^;]+/gi, 'display: none')
+          .replace(/display\s*:\s*[^;"]+/gi, 'display: none')
           .replace(/width\s*:\s*[^;]+/gi, '')
           .replace(/height\s*:\s*[^;]+/gi, '')
           .replace(/(color|background|border[^:]*)\s*:\s*[^;]+/gi, '$1: #ffffff');
