@@ -2,32 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>HTML Cleaner</title>
+  <title>HTML Cleaner & PMTA Config Generator</title>
   <style>
-    body { font-family: Arial; padding: 20px; max-width: 800px; margin: auto; }
-    textarea { width: 100%; height: 200px; margin-bottom: 10px; }
-    button { padding: 10px 20px; font-size: 16px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      max-width: 900px;
+    }
+    textarea, input, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-family: monospace;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 20px;
+      white-space: pre-wrap;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-  <h2>HTML Cleaner</h2>
+  <h1>HTML Cleaner & PMTA Config Generator</h1>
+  <button onclick="showSection('htmlCleaner')">HTML Cleaner</button>
+  <button onclick="showSection('pmtaConfig')">PMTA Config Generator</button>
 
-  <textarea id="input" placeholder="Paste your HTML code here..."></textarea>
-  <button onclick="cleanHTML()">Clean HTML</button>
-  <textarea id="output" placeholder="Cleaned HTML will appear here..." readonly></textarea>
+  <!-- HTML Cleaner -->
+  <div id="htmlCleaner" class="section active">
+    <h2>HTML Cleaner</h2>
+    <textarea id="input" placeholder="Paste your HTML code here..."></textarea>
+    <button onclick="cleanHTML()">Clean HTML</button>
+    <textarea id="output" placeholder="Cleaned HTML will appear here..." readonly></textarea>
+  </div>
 
+  <!-- PMTA Config Generator -->
+  <div id="pmtaConfig" class="section">
+    <h2>PMTA Config Generator</h2>
+
+    <label for="pmtaName">PMTA Name:</label>
+    <input type="text" id="pmtaName" placeholder="Enter PMTA name">
+
+    <label for="dkimType">Select DKIM Type:</label>
+    <select id="dkimType" onchange="toggleSecondDkimField()">
+      <option value="single">Single DKIM</option>
+      <option value="double">Double DKIM</option>
+    </select>
+
+    <div id="secondDkimDomainBox" style="display:none;">
+      <label for="secondDkimDomain">Second DKIM Domain:</label>
+      <input type="text" id="secondDkimDomain" placeholder="Enter second DKIM Domain">
+    </div>
+
+    <label for="inputData">Enter IP|Domain:</label>
+    <textarea id="inputData" rows="10" placeholder="IP|Domain"></textarea>
+
+    <button onclick="generatePMTAConfig()">Generate Config</button>
+
+    <h3>PMTA Config:</h3>
+    <pre id="outputConfig"></pre>
+  </div>
+
+  <!-- Script Section -->
   <script>
+    // Switch sections
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+
+    // HTML Cleaner Function
     function cleanHTML() {
       let html = document.getElementById('input').value;
 
-     
       html = html.replace(/\bhref\s*=\s*(['"])(.*?)\1/gi, 'href=""');
       html = html.replace(/\bsrc\s*=\s*(['"])(.*?)\1/gi, 'src=""');
       html = html.replace(/\balt\s*=\s*(['"])(.*?)\1/gi, 'alt=""');
       html = html.replace(/\btitle\s*=\s*(['"])(.*?)\1/gi, 'title=""');
 
-     
       html = html.replace(/(#(?:[0-9a-fA-F]{3,6})|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|\b[a-z]+\b)(?=[\s;:])/gi, function(match) {
         const colorKeywords = ['black', 'red', 'blue', 'green', 'gray', 'grey', 'orange', 'purple', 'yellow', 'pink', 'teal', 'navy', 'maroon', 'lime', 'aqua', 'silver', 'gold'];
         if (match.startsWith('#') || match.startsWith('rgb') || match.startsWith('hsl') || colorKeywords.includes(match.toLowerCase())) {
@@ -36,10 +102,8 @@
         return match;
       });
 
-      
       html = html.replace(/(border[^:]*:\s*)([^;]+)/gi, '$1#ffffff');
 
-     
       html = html.replace(/style\s*=\s*(['"])(.*?)\1/gi, function(match, quote, styles) {
         let newStyles = styles
           .replace(/display\s*:\s*[^;"]+/gi, 'display: none')
@@ -50,11 +114,74 @@
         return `style=${quote}${newStyles.trim()}${quote}`;
       });
 
-      
       html = html.replace(/>([^<]*)</g, '><');
-
-    
       document.getElementById('output').value = html;
+    }
+
+    // PMTA Generator Functions
+    function toggleSecondDkimField() {
+      const dkimType = document.getElementById("dkimType").value;
+      const box = document.getElementById("secondDkimDomainBox");
+      box.style.display = dkimType === "double" ? "block" : "none";
+    }
+
+    function getRandomKeyName() {
+      const adjectives = ['default', 'main', 'primary', 'secure', 'trusty'];
+      const nouns = ['key', 'dkim', 'sign', 'token', 'proof'];
+      return adjectives[Math.floor(Math.random() * adjectives.length)] +
+             nouns[Math.floor(Math.random() * nouns.length)];
+    }
+
+    function generatePMTAConfig() {
+      const pmtaName = document.getElementById("pmtaName").value.trim();
+      const dkimType = document.getElementById("dkimType").value;
+      const secondDkimDomain = document.getElementById("secondDkimDomain").value.trim();
+      const inputLines = document.getElementById("inputData").value.trim().split('\n');
+      let result = '';
+
+      inputLines.forEach((line) => {
+        const [ip, domain] = line.trim().split('|');
+        if (!ip || !domain) return;
+
+        const dkimKey1 = getRandomKeyName();
+        const dkimKey2 = getRandomKeyName();
+
+        result += `<virtual-mta ${pmtaName}_${ip}>\n`;
+        result += `smtp-source-host ${ip} ${domain}\n`;
+        result += `domain-key ${dkimKey1},${domain},/etc/pmta/domain-keys/${dkimKey1}.${domain}.pem\n`;
+
+        if (dkimType === 'double' && secondDkimDomain) {
+          result += `domain-key ${dkimKey2},${secondDkimDomain},/etc/pmta/domain-keys/${dkimKey2}.${secondDkimDomain}.pem\n`;
+        }
+
+        result += `<domain $yahoofd>\n`;
+        result += `   max-smtp-out                1000\n`;
+        result += `   max-msg-per-connection      500\n`;
+        result += `   max-msg-rate                600/hr\n`;
+        result += `   retry-after                 1s\n`;
+        result += `   dkim-sign                   yes\n`;
+        result += `   dkim-identity               postmaster@${domain}\n`;
+
+        if (dkimType === 'double' && secondDkimDomain) {
+          result += `   second-dkim-identity        postmaster@${secondDkimDomain}\n`;
+          result += `   second-dkim-sign            yes\n`;
+        }
+
+        result += `   dk-sign                     yes\n`;
+        result += `   smtp-greeting-timeout       3m\n`;
+        result += `   421-means-mx-unavailable    yes\n`;
+        result += `   log-connections             no\n`;
+        result += `   log-commands                no\n`;
+        result += `   bounce-after                24h\n`;
+        result += `smtp-pattern-list yahoofd-errors\n`;
+        result += `backoff-to-normal-after 1h #added in v3.5\n`;
+        result += `backoff-max-msg-per-hour 2\n`;
+        result += `backoff-retry-after 30m\n`;
+        result += `</domain>\n`;
+        result += `</virtual-mta>\n\n`;
+      });
+
+      document.getElementById("outputConfig").textContent = result;
     }
   </script>
 
