@@ -110,7 +110,7 @@
           .replace(/width\s*:\s*[^;]+/gi, '')
           .replace(/height\s*:\s*[^;]+/gi, '')
           .replace(/padding\s*:\s*[^;]+/gi, 'padding: 0')
-          .replace(/(color|background|border[^:]*)\s*:\s*[^;]+/gi, '$1: #ffffff');
+          .replace(/(color|background|border|bgcolor[^:]*)\s*:\s*[^;]+/gi, '$1: #ffffff');
         return `style=${quote}${newStyles.trim()}${quote}`;
       });
 
