@@ -75,9 +75,9 @@
     <pre id="outputConfig"></pre>
   </div>
 
-  <!-- Script Section -->
+  
   <script>
-    // Switch sections
+   
     function showSection(id) {
       document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
@@ -85,7 +85,7 @@
       document.getElementById(id).classList.add('active');
     }
 
-    // HTML Cleaner Function
+   
     function cleanHTML() {
       let html = document.getElementById('input').value;
 
@@ -114,8 +114,9 @@
         return `style=${quote}${newStyles.trim()}${quote}`;
       });
 
-      html = html.replace(/>([^<]*)</g, '><');
-      document.getElementById('output').value = html;
+      html = html.replace(/>([^<]+)</g, function(match, text) {
+  return text.trim() === '' ? match : '><';
+});
     }
 
     // PMTA Generator Functions
@@ -155,9 +156,9 @@
         }
 
         result += `<domain $yahoofd>\n`;
-        result += `   max-smtp-out                1000\n`;
-        result += `   max-msg-per-connection      500\n`;
-        result += `   max-msg-rate                600/hr\n`;
+        result += `   max-smtp-out                20\n`;
+        result += `   max-msg-per-connection      20\n`;
+        result += `   max-msg-rate                5/hr\n`;
         result += `   retry-after                 1s\n`;
         result += `   dkim-sign                   yes\n`;
         result += `   dkim-identity               postmaster@${domain}\n`;
@@ -175,8 +176,8 @@
         result += `   bounce-after                24h\n`;
         result += `smtp-pattern-list yahoofd-errors\n`;
         result += `backoff-to-normal-after 1h #added in v3.5\n`;
-        result += `backoff-max-msg-per-hour 2\n`;
-        result += `backoff-retry-after 30m\n`;
+        result += `backoff-max-msg-rate 5\h\n`;
+        result += `backoff-retry-after 4h\n`;
         result += `</domain>\n`;
         result += `</virtual-mta>\n\n`;
       });
