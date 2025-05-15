@@ -75,9 +75,9 @@
     <pre id="outputConfig"></pre>
   </div>
 
-  
+ 
   <script>
-   
+    
     function showSection(id) {
       document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
@@ -114,9 +114,11 @@
         return `style=${quote}${newStyles.trim()}${quote}`;
       });
 
-      html = html.replace(/>([^<]+)</g, function(match, text) {
+    html = html.replace(/>([^<]+)</g, function(match, text) {
   return text.trim() === '' ? match : '><';
 });
+	  
+      document.getElementById('output').value = html;
     }
 
     // PMTA Generator Functions
@@ -176,7 +178,7 @@
         result += `   bounce-after                24h\n`;
         result += `smtp-pattern-list yahoofd-errors\n`;
         result += `backoff-to-normal-after 1h #added in v3.5\n`;
-        result += `backoff-max-msg-rate 5\h\n`;
+        result += `backoff-max-msg-rate 5/hr\n`;
         result += `backoff-retry-after 4h\n`;
         result += `</domain>\n`;
         result += `</virtual-mta>\n\n`;
